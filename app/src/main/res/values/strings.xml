@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">VibeCut</string>
+    <string name="studio_tagline">Viral Clip Studio • v2.1</string>
+    <string name="developer_name">Irfan Ali Channa</string>
+    <string name="app_version_label">VibeCut (v2.1)</string>
+    <string name="app_description_full">Turn long videos and social links (YouTube, TikTok, Facebook, Instagram) or long gallery videos into viral short clips in 15s, 30s, 60s, 5m, or 10m formats. Free tier includes 360p and 1–2 clips; 720p HD, 1080p FHD, 1440p UHD, 3–40 batch clips, and watermark removal can be unlocked via ads (or subscriptions when ad-supported monetization is turned off).</string>
+    <string name="action_new_project">Pick Gallery Video</string>
+    <string name="action_add_clips">Add Clips</string>
+    <string name="action_export">Export</string>
+    <string name="action_split">Split</string>
+    <string name="action_play_pause">Play or pause</string>
+    <string name="empty_drafts_title">Ready to Cut</string>
+    <string name="empty_drafts_subtitle">Pick one or more videos from your gallery to trim, split, merge, grade with GPU filters, and export up to 8K.</string>
+    <string name="privacy_policy_full">VibeCut Privacy Policy (Effective v2.1)\n\n1. Media &amp; Link Processing\nVibeCut processes user-selected gallery videos and user-provided media links (such as YouTube, TikTok, Facebook, Instagram, or direct MP4 URLs) solely to inspect video metadata, generate timeline previews, and create short clips requested by you on your device.\n\n2. Advertising &amp; Monetization Partners\nWhen ad-supported monetization is enabled, VibeCut integrates configurable ad networks — Start.io, Unity Ads, and Adsterra — which may process standard advertising identifiers, device configuration, and network signals (such as IP/user-agent/request headers) to serve, cap, and measure ads.\n\n3. Account Sync &amp; Referrals\nWhen signed in with Google, VibeCut stores your generated clip metadata, monetization preferences, and referral bonus credits securely in Google Firebase Firestore. VibeCut does not sell personal user data to third parties.\n\n4. Data Control &amp; Contact\nYou may delete your saved clips or sign out at any time from the Info tab. For privacy questions, support, or data deletion inquiries, contact developer Irfan Ali Channa.</string>
+    <string name="disclaimer_full">Copyright &amp; Platform Disclaimer: You are solely responsible for ensuring you own or have permission to clip, edit, and share any source video or link you load into VibeCut. VibeCut is an independent creative tool developed by Irfan Ali Channa and is not affiliated with, endorsed by, or sponsored by YouTube, Instagram, TikTok, or Facebook. Ad-supported free access allows unlocking HD/UHD exports, 3–40 batch clips, and watermark removal without a paid subscription.</string>
+</resources>

@@ -1,0 +1,268 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidReferralCodeId(code) {
+      return code is string && code.size() >= 4 && code.size() <= 24 && code.matches('^[A-Z0-9\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email == 'waheed61762@gmail.com' && request.auth.token.email_verified == true) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidMonetizationConfig(data) {
+      return data.adSupportedMonetization is bool &&
+             data.subscriptionEnabled is bool &&
+             data.adSupportedMonetization != data.subscriptionEnabled &&
+             data.activeAdNetwork in ['START_IO', 'UNITY_ADS', 'ADSTERRA'] &&
+             data.startIoAppId is string && data.startIoAppId.size() <= 64 &&
+             data.startIoTestMode is bool &&
+             data.unityGameId is string && data.unityGameId.size() <= 64 &&
+             data.unityRewardedPlacementId is string && data.unityRewardedPlacementId.size() <= 64 &&
+             data.unityInterstitialPlacementId is string && data.unityInterstitialPlacementId.size() <= 64 &&
+             data.unityTestMode is bool &&
+             data.adsterraDirectLinkUrl is string && data.adsterraDirectLinkUrl.size() <= 500 &&
+             data.adsterraBannerTagId is string && data.adsterraBannerTagId.size() <= 120 &&
+             data.adsterraInterstitialTagId is string && data.adsterraInterstitialTagId.size() <= 120 &&
+             data.adsterraTestMode is bool &&
+             data.interstitialEveryNBatches is int &&
+             data.interstitialEveryNBatches >= 1 &&
+             data.interstitialEveryNBatches <= 20 &&
+             data.updatedByEmail is string &&
+             data.updatedByEmail.size() >= 1 &&
+             data.updatedByEmail.size() <= 120;
+    }
+
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             isValidReferralCodeId(data.inviteCode) &&
+             (!('referredByCode' in data) || (isValidReferralCodeId(data.referredByCode))) &&
+             data.referralCount is int && data.referralCount >= 0 && data.referralCount <= 100000 &&
+             data.bonusCredits is int && data.bonusCredits >= 0 && data.bonusCredits <= 1000000 &&
+             data.adUnlockedBatches is int && data.adUnlockedBatches >= 0 && data.adUnlockedBatches <= 1000000 &&
+             data.adUnlockedHd is bool &&
+             data.adUnlockedWatermarkFree is bool &&
+             data.subscriptionActive is bool &&
+             data.subscriptionPlan in ['NONE', 'PRO_MONTHLY', 'PRO_YEARLY'] &&
+             data.batchesProcessed is int && data.batchesProcessed >= 0 && data.batchesProcessed <= 1000000;
+    }
+
+    function isValidClipRecord(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+             data.sourceLabel is string && data.sourceLabel.size() >= 1 && data.sourceLabel.size() <= 200 &&
+             data.formatLabel is string && data.formatLabel.size() >= 1 && data.formatLabel.size() <= 40 &&
+             data.aspectRatio is string && data.aspectRatio.size() >= 1 && data.aspectRatio.size() <= 24 &&
+             data.durationMs is int && data.durationMs >= 200 && data.durationMs <= 3600000 &&
+             data.resolutionLabel is string && data.resolutionLabel.size() >= 1 && data.resolutionLabel.size() <= 40 &&
+             data.outputUriString is string && data.outputUriString.size() >= 1 && data.outputUriString.size() <= 500 &&
+             data.displayPath is string && data.displayPath.size() >= 1 && data.displayPath.size() <= 240 &&
+             data.fileSizeMb is number && data.fileSizeMb >= 0 && data.fileSizeMb <= 50000 &&
+             data.discoveryMode in ['VIRAL_CLIPS', 'SMART_HIGHLIGHTS', 'SEQUENTIAL'] &&
+             data.cropMode in ['FILL_CROP', 'FIT_FRAME'] &&
+             data.watermarkApplied is bool;
+    }
+
+    function isValidReferralCodeDoc(data) {
+      return isValidReferralCodeId(data.code) &&
+             data.ownerUid is string && data.ownerUid.size() >= 1 && data.ownerUid.size() <= 128 &&
+             data.ownerName is string && data.ownerName.size() >= 1 && data.ownerName.size() <= 80;
+    }
+
+    function isValidReferralClaim(data) {
+      return data.claimantUid is string && data.claimantUid.size() >= 1 && data.claimantUid.size() <= 128 &&
+             data.claimantName is string && data.claimantName.size() >= 1 && data.claimantName.size() <= 80 &&
+             data.inviterUid is string && data.inviterUid.size() >= 1 && data.inviterUid.size() <= 128 &&
+             isValidReferralCodeId(data.code) &&
+             data.creditsAwarded is int && data.creditsAwarded == 5;
+    }
+
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && request.auth.uid == adminId;
+      allow list, create, update, delete: if false;
+    }
+
+    match /app_config/{configId} {
+      allow get: if isSignedIn() && configId == 'monetization';
+      allow list: if false;
+
+      allow create: if isAdmin() &&
+                       configId == 'monetization' &&
+                       isValidMonetizationConfig(incoming()) &&
+                       incoming().keys().hasAll([
+                         'adSupportedMonetization', 'subscriptionEnabled', 'activeAdNetwork',
+                         'startIoAppId', 'startIoTestMode', 'unityGameId',
+                         'unityRewardedPlacementId', 'unityInterstitialPlacementId', 'unityTestMode',
+                         'adsterraDirectLinkUrl', 'adsterraBannerTagId', 'adsterraInterstitialTagId',
+                         'adsterraTestMode', 'interstitialEveryNBatches', 'updatedByEmail',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'adSupportedMonetization', 'subscriptionEnabled', 'activeAdNetwork',
+                         'startIoAppId', 'startIoTestMode', 'unityGameId',
+                         'unityRewardedPlacementId', 'unityInterstitialPlacementId', 'unityTestMode',
+                         'adsterraDirectLinkUrl', 'adsterraBannerTagId', 'adsterraInterstitialTagId',
+                         'adsterraTestMode', 'interstitialEveryNBatches', 'updatedByEmail',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isAdmin() &&
+                       isValidMonetizationConfig(incoming()) &&
+                       configId == 'monetization' &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'adSupportedMonetization', 'subscriptionEnabled', 'activeAdNetwork',
+                         'startIoAppId', 'startIoTestMode', 'unityGameId',
+                         'unityRewardedPlacementId', 'unityInterstitialPlacementId', 'unityTestMode',
+                         'adsterraDirectLinkUrl', 'adsterraBannerTagId', 'adsterraInterstitialTagId',
+                         'adsterraTestMode', 'interstitialEveryNBatches', 'updatedByEmail', 'updatedAt'
+                       ]);
+
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if false;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().userId == request.auth.uid &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'inviteCode', 'referralCount', 'bonusCredits',
+                         'adUnlockedBatches', 'adUnlockedHd', 'adUnlockedWatermarkFree',
+                         'subscriptionActive', 'subscriptionPlan', 'batchesProcessed',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'inviteCode', 'referredByCode', 'referralCount',
+                         'bonusCredits', 'adUnlockedBatches', 'adUnlockedHd', 'adUnlockedWatermarkFree',
+                         'subscriptionActive', 'subscriptionPlan', 'batchesProcessed',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().inviteCode == existing().inviteCode &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'displayName', 'referredByCode', 'referralCount', 'bonusCredits',
+                         'adUnlockedBatches', 'adUnlockedHd', 'adUnlockedWatermarkFree',
+                         'subscriptionActive', 'subscriptionPlan', 'batchesProcessed', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+
+      match /clips/{clipId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(clipId);
+        allow list: if isSignedIn() && request.auth.uid == userId;
+
+        allow create: if isSignedIn() &&
+                         request.auth.uid == userId &&
+                         isValidId(clipId) &&
+                         incoming().userId == request.auth.uid &&
+                         isValidClipRecord(incoming()) &&
+                         incoming().keys().hasAll([
+                           'userId', 'title', 'sourceLabel', 'formatLabel', 'aspectRatio',
+                           'durationMs', 'resolutionLabel', 'outputUriString', 'displayPath',
+                           'fileSizeMb', 'discoveryMode', 'cropMode', 'watermarkApplied',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'title', 'sourceLabel', 'formatLabel', 'aspectRatio',
+                           'durationMs', 'resolutionLabel', 'outputUriString', 'displayPath',
+                           'fileSizeMb', 'discoveryMode', 'cropMode', 'watermarkApplied',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                         incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+        allow update: if isSignedIn() &&
+                         request.auth.uid == userId &&
+                         isValidId(clipId) &&
+                         isValidClipRecord(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'title', 'outputUriString', 'displayPath', 'updatedAt'
+                         ]);
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(clipId);
+      }
+    }
+
+    match /referral_codes/{code} {
+      allow get: if isSignedIn() && isValidReferralCodeId(code);
+      allow list: if false;
+
+      allow create: if isSignedIn() &&
+                       isValidReferralCodeId(code) &&
+                       incoming().code == code &&
+                       incoming().ownerUid == request.auth.uid &&
+                       isValidReferralCodeDoc(incoming()) &&
+                       incoming().keys().hasAll(['code', 'ownerUid', 'ownerName', 'createdAt']) &&
+                       incoming().keys().hasOnly(['code', 'ownerUid', 'ownerName', 'createdAt']) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time;
+
+      allow update, delete: if false;
+    }
+
+    match /referral_claims/{claimantId} {
+      allow get: if isSignedIn() && isValidId(claimantId) && (
+        request.auth.uid == claimantId || existing().inviterUid == request.auth.uid
+      );
+      allow list: if isSignedIn() && existing().inviterUid == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(claimantId) &&
+                       claimantId == request.auth.uid &&
+                       incoming().claimantUid == request.auth.uid &&
+                       incoming().inviterUid != request.auth.uid &&
+                       isValidReferralClaim(incoming()) &&
+                       incoming().keys().hasAll(['claimantUid', 'claimantName', 'inviterUid', 'code', 'creditsAwarded', 'createdAt']) &&
+                       incoming().keys().hasOnly(['claimantUid', 'claimantName', 'inviterUid', 'code', 'creditsAwarded', 'createdAt']) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       exists(/databases/$(database)/documents/referral_codes/$(incoming().code)) &&
+                       get(/databases/$(database)/documents/referral_codes/$(incoming().code)).data.ownerUid == incoming().inviterUid;
+
+      allow update, delete: if false;
+    }
+  }
+}

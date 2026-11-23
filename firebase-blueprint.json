@@ -1,0 +1,228 @@
+{
+  "entities": {
+    "MonetizationConfig": {
+      "title": "MonetizationConfig",
+      "description": "Global VibeCut ad-network and monetization settings synced live across all users.",
+      "type": "object",
+      "properties": {
+        "adSupportedMonetization": {
+          "type": "boolean",
+          "description": "When true, subscription UI is hidden and pro features unlock via ads. Mutually exclusive with subscriptionEnabled."
+        },
+        "subscriptionEnabled": {
+          "type": "boolean",
+          "description": "When true, paid subscriptions unlock pro features and ads are disabled. Mutually exclusive with adSupportedMonetization."
+        },
+        "activeAdNetwork": {
+          "type": "string",
+          "enum": ["START_IO", "UNITY_ADS", "ADSTERRA"],
+          "description": "Active multi-network ad provider."
+        },
+        "startIoAppId": {
+          "type": "string"
+        },
+        "startIoTestMode": {
+          "type": "boolean"
+        },
+        "unityGameId": {
+          "type": "string"
+        },
+        "unityRewardedPlacementId": {
+          "type": "string"
+        },
+        "unityInterstitialPlacementId": {
+          "type": "string"
+        },
+        "unityTestMode": {
+          "type": "boolean"
+        },
+        "adsterraDirectLinkUrl": {
+          "type": "string"
+        },
+        "adsterraBannerTagId": {
+          "type": "string"
+        },
+        "adsterraInterstitialTagId": {
+          "type": "string"
+        },
+        "adsterraTestMode": {
+          "type": "boolean"
+        },
+        "interstitialEveryNBatches": {
+          "type": "integer"
+        },
+        "updatedByEmail": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp written via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp written via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "adSupportedMonetization",
+        "subscriptionEnabled",
+        "activeAdNetwork",
+        "startIoAppId",
+        "startIoTestMode",
+        "unityGameId",
+        "unityRewardedPlacementId",
+        "unityInterstitialPlacementId",
+        "unityTestMode",
+        "adsterraDirectLinkUrl",
+        "adsterraBannerTagId",
+        "adsterraInterstitialTagId",
+        "adsterraTestMode",
+        "interstitialEveryNBatches",
+        "updatedByEmail",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Per-user credits, ad unlocks, subscription status, and referral tracking.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "inviteCode": { "type": "string" },
+        "referredByCode": { "type": "string" },
+        "referralCount": { "type": "integer" },
+        "bonusCredits": { "type": "integer" },
+        "adUnlockedBatches": { "type": "integer" },
+        "adUnlockedHd": { "type": "boolean" },
+        "adUnlockedWatermarkFree": { "type": "boolean" },
+        "subscriptionActive": { "type": "boolean" },
+        "subscriptionPlan": {
+          "type": "string",
+          "enum": ["NONE", "PRO_MONTHLY", "PRO_YEARLY"]
+        },
+        "batchesProcessed": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "inviteCode",
+        "referralCount",
+        "bonusCredits",
+        "adUnlockedBatches",
+        "adUnlockedHd",
+        "adUnlockedWatermarkFree",
+        "subscriptionActive",
+        "subscriptionPlan",
+        "batchesProcessed",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "GeneratedClipRecord": {
+      "title": "GeneratedClipRecord",
+      "description": "Metadata for a generated short clip stored in My Clips.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "sourceLabel": { "type": "string" },
+        "formatLabel": { "type": "string" },
+        "aspectRatio": { "type": "string" },
+        "durationMs": { "type": "integer" },
+        "resolutionLabel": { "type": "string" },
+        "outputUriString": { "type": "string" },
+        "displayPath": { "type": "string" },
+        "fileSizeMb": { "type": "number" },
+        "discoveryMode": {
+          "type": "string",
+          "enum": ["VIRAL_CLIPS", "SMART_HIGHLIGHTS", "SEQUENTIAL"]
+        },
+        "cropMode": {
+          "type": "string",
+          "enum": ["FILL_CROP", "FIT_FRAME"]
+        },
+        "watermarkApplied": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId",
+        "title",
+        "sourceLabel",
+        "formatLabel",
+        "aspectRatio",
+        "durationMs",
+        "resolutionLabel",
+        "outputUriString",
+        "displayPath",
+        "fileSizeMb",
+        "discoveryMode",
+        "cropMode",
+        "watermarkApplied",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ReferralCode": {
+      "title": "ReferralCode",
+      "description": "Public invite code registry mapping an uppercase code to its owner UID.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "ownerName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["code", "ownerUid", "ownerName", "createdAt"]
+    },
+    "ReferralClaim": {
+      "title": "ReferralClaim",
+      "description": "Verified referral claim created once by a joining user on a new device.",
+      "type": "object",
+      "properties": {
+        "claimantUid": { "type": "string" },
+        "claimantName": { "type": "string" },
+        "inviterUid": { "type": "string" },
+        "code": { "type": "string" },
+        "creditsAwarded": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "claimantUid",
+        "claimantName",
+        "inviterUid",
+        "code",
+        "creditsAwarded",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/app_config/{configId}": {
+      "schema": { "$ref": "#/entities/MonetizationConfig" },
+      "description": "Global live monetization and ad-network configuration document (monetization)."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Per-user VibeCut credits, ad unlocks, subscription, and referral totals."
+    },
+    "/users/{userId}/clips/{clipId}": {
+      "schema": { "$ref": "#/entities/GeneratedClipRecord" },
+      "description": "User-owned generated clips displayed in My Clips."
+    },
+    "/referral_codes/{code}": {
+      "schema": { "$ref": "#/entities/ReferralCode" },
+      "description": "Invite code lookup table indexed by uppercase invite code."
+    },
+    "/referral_claims/{claimantId}": {
+      "schema": { "$ref": "#/entities/ReferralClaim" },
+      "description": "One-time referral claim per joining user UID."
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "VibeCut",
+  "description": "Turn long videos and social links into viral short clips in 15s, 30s, 60s, 5m, or 10m formats with multi-ratio framing, timeline editing, referral rewards, and configurable monetization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
