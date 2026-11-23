@@ -40,8 +40,8 @@ jobs:
       - name: Build Debug APK
         run: gradle :app:assembleDebug --no-daemon
 
-      - name: Upload PrismCut Debug APK
+      - name: Upload VibeCut Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: PrismCut-debug-apk
+          name: VibeCut-debug-apk
           path: app/build/outputs/apk/debug/*.apk
